@@ -7,7 +7,7 @@
 # shellcheck disable=SC2164
 # shellcheck disable=SC2002
 
-version='1.0.0'
+version='1.0.2'
 print_help() {
   printf "seft (Secure Enough File Transfer) \n"
   printf "version: $version \n\n"
@@ -107,7 +107,11 @@ if [[ $direction == 'send' ]]; then
   fi
 
   # Split full path to base/directory name
-  file_name=$(basename "$file"); debug "file_name is: $file_name"
+  if [[ $file == '.' ]]; then
+     file_name="$(basename $(pwd))"; debug "file_name is: $file_name"
+  else
+    file_name=$(basename "$file"); debug "file_name is: $file_name"
+  fi
   directory=$(dirname "$file");  debug "directory is: $directory"
 
   # Set password if not specified
@@ -121,11 +125,11 @@ if [[ $direction == 'send' ]]; then
   # zip directory if not a file
   if [ -d "$file" ];then
   debug "Zipping directory: $file_name"
-    file_name="$file_name.zip" ,
+    file_name="$file_name.zip"
     cd "$file"; debug "Set working directory as: $file"
 
     log info 'Zipping directory contents'
-    zip -r -q - .
+    zip -r -q $file_name $file -x "$file_name" -x "..zip"
   fi
 
   # Encrypt contents
@@ -147,6 +151,10 @@ if [[ $direction == 'send' ]]; then
 
     # Cleanup files
     cleanup "$directory/$to_send"
+
+    if [ -d "$file" ];then
+      cleanup "$directory/$file_name"
+    fi
 
     # Print password
     log info "Password is: $password"
@@ -193,7 +201,7 @@ elif [[ $direction == 'receive' ]]; then
   # Unzip file
   if [[ $unzip == 'true' && $out_file == *.zip ]]; then
     log info 'Unzipping file'
-    unzip $out_file -q
+    unzip -q $out_file
 
     cleanup "./$file_name"
     cleanup "./$out_file"
