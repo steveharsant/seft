@@ -7,7 +7,7 @@
 # shellcheck disable=SC2164
 # shellcheck disable=SC2002
 
-version='1.1.0'
+version='1.1.1'
 print_help() {
   printf "seft (Secure Enough File Transfer)\n
   version: $version \n
@@ -117,7 +117,7 @@ if [[ $direction == 'send' ]]; then
 
   # Split full path to base/directory name
   if [[ $file == '.' ]]; then
-     file_name="$(basename $(pwd))"; debug "file_name is: $file_name"
+     file_name="$(basename "$(pwd)")"; debug "file_name is: $file_name"
   else
     file_name=$(basename "$file"); debug "file_name is: $file_name"
   fi
