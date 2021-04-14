@@ -7,33 +7,41 @@
 # shellcheck disable=SC2164
 # shellcheck disable=SC2002
 
-version='1.0.2'
+version='1.1.0'
 print_help() {
-  printf "seft (Secure Enough File Transfer) \n"
-  printf "version: $version \n\n"
-  printf "seft is a simple file transfer wrapper script for https://transfer.sh which allows files and directories \n"
-  printf "to be password encrypted using openssl aes256. This is ideal for transferring files that are not sensitive \n"
-  printf "whilst still keeping files password protected from nosy people.\n\n"
-  printf "USAGE: \n"
-  printf "    seft -s foo.txt \n"
-  printf "    seft -s /path/to/entire/directory -p MyPassword1234 \n"
-  printf "    seft -r https://transfer.sh/foobar/foo.txt -p MyPassword1234 -z \n\n"
-  printf "OPTIONS: \n"
-  printf "    -c    Do not cleanup zip files or encrypted files after processing (Receive only)\n"
-  printf "    -d    Enable debugging messages\n"
-  printf "    -h    Print help message\n"
-  printf "    -l    Password length. Defaults to 6 (Send only)\n"
-  printf "    -p    Specifies a password (Send)\n"
-  printf "          Password required for decryption (Receive)\n"
-  printf "    -r    transfer.sh download url (Receive only)\n"
-  printf "    -s    File or directory to send (Send only)\n"
-  printf "    -u    Do not encrypt file/directory (Send)\n"
-  printf "          Do not decrypt downloaded file (Receive)\n"
-  printf "    -z    Do not unzip downloaded file. Useful to keep a transferred directory as a zipped package (Receive only)\n\n"
-  printf "TIP:\n"
-  printf "    Need to download an encrypted file to a computer that cannot get seft? Use:\n\n"
-  printf "      curl https://transfer.sh/foobar/foo.txt -o '<<ENCRYPTED FILENAME>>' \n"
-  printf "      openssl enc -k <<PASSWORD>> -aes256 -base64 -d -in '<<ENCRYPTED FILENAME>>' -out '<<DECRYPTED FILENAME>>'\n\n"
+  printf "seft (Secure Enough File Transfer)\n
+  version: $version \n
+  seft is a simple file transfer wrapper script for https://transfer.sh which allows files and directories
+  to be password encrypted using openssl aes256. This is ideal for transferring files that are not sensitive
+  whilst still keeping files password protected from nosy people.\n
+  USAGE:
+      seft -s foo.txt
+      seft -s /path/to/entire/directory -p MyPassword1234
+      seft -r https://transfer.sh/foobar/foo.txt -p MyPassword1234 -z \n
+  OPTIONS:
+      -c    Do not cleanup zip files or encrypted files after processing (Receive only)
+      -d    Enable debugging messages
+      -h    Print help message
+      -l    Password length. Defaults to 6 (Send only)
+      -m    Print manual download and decrypt message. Useful for downloading an encrypted file when seft cannot be coped to a specific host
+      -p    Specifies a password (Send)
+            Password required for decryption (Receive)
+      -r    transfer.sh download url (Receive only)
+      -s    File or directory to send (Send only)
+      -u    Do not encrypt file/directory (Send)
+            Do not decrypt downloaded file (Receive)
+      -z    Do not unzip downloaded file. Useful to keep a transferred directory as a zipped package (Receive only)\n
+  TIP:
+      Need to download an encrypted file to a computer that cannot get seft? Use:\n
+        curl https://transfer.sh/foobar/foo.txt -o '<<ENCRYPTED FILENAME>>'
+        openssl enc -k <<PASSWORD>> -aes256 -base64 -d -in '<<ENCRYPTED FILENAME>>' -out '<<DECRYPTED FILENAME>>'\n\n"
+  exit 0
+}
+
+print_manual_download() {
+  printf "Need to download an encrypted file to a computer that cannot get seft? Use:\n
+    curl https://transfer.sh/foobar/foo.txt -o '<<ENCRYPTED FILENAME>>'
+    openssl enc -k <<PASSWORD>> -aes256 -base64 -d -in '<<ENCRYPTED FILENAME>>' -out '<<DECRYPTED FILENAME>>'\n\n"
   exit 0
 }
 
@@ -62,12 +70,13 @@ password_length=6
 unzip='true'
 
 # set script arguments as variables
-while getopts "cdf:hlp:r:s:uz" OPT; do
+while getopts "cd:hl:mp:r:s:uz" OPT; do
   case "$OPT" in
     c) cleanup='false'; debug 'Not cleaning up encrypted file after transmission';;
     d) enable_debug=1; debug 'Debugging enabled';;
     h) print_help;;
     l) password_length=$OPTARG;;
+    m) print_manual_download;;
     p) password=$OPTARG; debug 'A password has been specified';;
     r) address=$OPTARG; debug "Receive address specifed as: $address";;
     s) file=$OPTARG; debug "File/directory specified: $file";;
